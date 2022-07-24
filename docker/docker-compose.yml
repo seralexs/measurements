@@ -1,0 +1,39 @@
+version: '3'
+services:
+    php-fpm:
+        build:
+            context: ./
+            dockerfile: php/Dockerfile
+        container_name: measurements-php-fpm
+        restart: unless-stopped
+        working_dir: /var/www/measurements
+        volumes:
+            - ../:/var/www/measurements
+#    php-cli:
+#        image: php:8.1.0-cli
+#        container_name: measurements-php-cli
+#        restart: unless-stopped
+#        working_dir: /var/www/measurements
+#        volumes:
+#            - ../:/var/www/measurements
+    mysql:
+        image: mysql:8.0
+        container_name: measurements-mysql
+        restart: unless-stopped
+        environment:
+            MYSQL_DATABASE: "measurements"
+            MYSQL_ROOT_PASSWORD: "test12345"
+            MYSQL_PASSWORD: "test12345"
+            MYSQL_USER: "measurements"
+        ports:
+            - "3306:3306"
+    nginx:
+        image: nginx:1.21
+        container_name: measurements-nginx
+        ports:
+            - "8080:80"
+        volumes:
+            - ../:/var/www/measurements
+            - ./nginx:/etc/nginx/conf.d
+        depends_on:
+            - php-fpm
